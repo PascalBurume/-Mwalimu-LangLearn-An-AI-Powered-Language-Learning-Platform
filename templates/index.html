@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mwalimu · AI Language Tutor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/css/style.css" />
+  <!-- marked.js for markdown rendering -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+
+  <!-- ── Particle Canvas Background ── -->
+  <canvas id="particle-canvas" aria-hidden="true"></canvas>
+
+  <!-- ── Hero Header ── -->
+  <header class="hero" id="hero">
+    <div class="hero-orb hero-orb--1" aria-hidden="true"></div>
+    <div class="hero-orb hero-orb--2" aria-hidden="true"></div>
+    <div class="hero-orb hero-orb--3" aria-hidden="true"></div>
+    <div class="hero-content">
+      <div class="hero-badge">
+        <span class="badge-dot"></span>
+        AI Language Tutor · Powered by Gemma 3n
+      </div>
+      <h1 class="hero-title">
+        Mwalimu<span class="hero-accent">.</span>
+      </h1>
+      <p class="hero-subtitle">
+        Your intelligent language teacher.<br/>
+        Learn <strong>14+ languages</strong> with real-time AI feedback,
+        visual vocabulary, and conversation practice.
+      </p>
+      <div class="hero-stats">
+        <div class="stat-card">
+          <span class="stat-number" data-count="14">0</span>
+          <span class="stat-label">Languages</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-number" data-count="5">0</span>
+          <span class="stat-label">Learning Modes</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-number">AI</span>
+          <span class="stat-label">Powered</span>
+        </div>
+      </div>
+      <!-- Connection status -->
+      <div class="connection-status" id="connection-status">
+        <span class="status-dot" id="status-dot"></span>
+        <span id="status-text">Connecting to AI…</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── Tab Navigation ── -->
+  <div class="tab-nav-wrapper">
+    <nav class="tab-nav" role="tablist" aria-label="Learning modes">
+      <button class="tab-btn active" role="tab" aria-selected="true"
+              data-tab="writing" aria-controls="tab-writing">
+        <span class="tab-icon">✍️</span>
+        <span class="tab-label">Writing</span>
+      </button>
+      <button class="tab-btn" role="tab" aria-selected="false"
+              data-tab="visual" aria-controls="tab-visual">
+        <span class="tab-icon">🖼️</span>
+        <span class="tab-label">Visual</span>
+      </button>
+      <button class="tab-btn" role="tab" aria-selected="false"
+              data-tab="translation" aria-controls="tab-translation">
+        <span class="tab-icon">🔄</span>
+        <span class="tab-label">Translation</span>
+      </button>
+      <button class="tab-btn" role="tab" aria-selected="false"
+              data-tab="vocabulary" aria-controls="tab-vocabulary">
+        <span class="tab-icon">📚</span>
+        <span class="tab-label">Vocabulary</span>
+      </button>
+      <button class="tab-btn" role="tab" aria-selected="false"
+              data-tab="conversation" aria-controls="tab-conversation">
+        <span class="tab-icon">💬</span>
+        <span class="tab-label">Conversation</span>
+      </button>
+      <div class="tab-ink" id="tab-ink" aria-hidden="true"></div>
+    </nav>
+  </div>
+
+  <!-- ── Tab Panels ── -->
+  <main class="tab-content" id="tab-content">
+
+    <!-- ════════════════════════════════════════════
+         TAB 1 · Writing Feedback
+    ═════════════════════════════════════════════ -->
+    <section class="tab-panel active" id="tab-writing" role="tabpanel"
+             aria-labelledby="btn-writing">
+      <div class="panel-header">
+        <div class="panel-icon-wrap writing-gradient">✍️</div>
+        <div>
+          <h2 class="panel-title">Writing Feedback</h2>
+          <p class="panel-desc">Write in your target language · receive corrections, explanations &amp; a score</p>
+        </div>
+      </div>
+
+      <div class="form-grid form-grid--2col">
+        <div class="form-group">
+          <label class="form-label" for="writing-lang">Target Language</label>
+          <select class="form-select" id="writing-lang">
+            {% for lang in languages %}
+            <option value="{{ lang }}" {% if lang == 'French' %}selected{% endif %}>{{ lang }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="writing-level">Proficiency Level</label>
+          <select class="form-select" id="writing-level">
+            {% for lvl in proficiency_levels %}
+            <option value="{{ lvl }}" {% if 'Intermediate' in lvl %}selected{% endif %}>{{ lvl }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="writing-text">Your Text</label>
+        <textarea class="form-textarea" id="writing-text" rows="6"
+                  placeholder="Write something in your target language here…&#10;&#10;Example: Je suis allé au magasin hier pour acheter du pain."></textarea>
+      </div>
+
+      <div class="example-chips" data-feature="writing">
+        <span class="chip-label">Quick example:</span>
+        <button class="chip" data-text="Je suis allé au magazin hier pour acheter du pain. Le pain était très bon et je mange beaucoup." data-lang="French" data-level="Intermediate (B1-B2)">French paragraph</button>
+        <button class="chip" data-text="Ninajifunza Kiswahili kwa sababu ninapenda lugha ya Afrika." data-lang="Swahili" data-level="Beginner (A1-A2)">Swahili sentence</button>
+        <button class="chip" data-text="きのう友達とレストランに食べました。とても美味しいでした。" data-lang="Japanese" data-level="Beginner (A1-A2)">Japanese sentence</button>
+      </div>
+
+      <button class="submit-btn writing-gradient" id="writing-submit">
+        <span class="btn-text">Get Feedback</span>
+        <span class="btn-icon">→</span>
+      </button>
+
+      <div class="result-card hidden" id="writing-result">
+        <div class="result-header">
+          <span class="result-title">AI Feedback</span>
+          <span class="result-timing" id="writing-timing"></span>
+        </div>
+        <div class="result-body markdown-body" id="writing-output"></div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════
+         TAB 2 · Visual Learning
+    ═════════════════════════════════════════════ -->
+    <section class="tab-panel" id="tab-visual" role="tabpanel"
+             aria-labelledby="btn-visual">
+      <div class="panel-header">
+        <div class="panel-icon-wrap visual-gradient">🖼️</div>
+        <div>
+          <h2 class="panel-title">Visual Learning</h2>
+          <p class="panel-desc">Upload an image · discover vocabulary in your target language</p>
+        </div>
+      </div>
+
+      {% if not has_vision %}
+      <div class="info-banner warning">
+        <span class="banner-icon">⚠️</span>
+        <div>
+          <strong>Vision model not detected.</strong>
+          The current model (<code>{{ model }}</code>) is text-only.
+          Pull a vision model to enable this tab:<br/>
+          <code>ollama pull llava</code> &nbsp;then set <code>OLLAMA_MODEL=llava</code>
+        </div>
+      </div>
+      {% endif %}
+
+      <div class="visual-layout">
+        <div class="upload-side">
+          <div class="drop-zone {% if not has_vision %}drop-zone--disabled{% endif %}" id="drop-zone">
+            <div class="drop-zone-inner">
+              <div class="drop-icon">🖼️</div>
+              <p class="drop-text">Drag &amp; drop an image here</p>
+              <p class="drop-sub">or click to browse</p>
+              <input type="file" id="visual-file" accept="image/*" class="file-input" {% if not has_vision %}disabled{% endif %} />
+            </div>
+            <img class="drop-preview hidden" id="drop-preview" alt="Preview" />
+          </div>
+
+          <div class="form-grid form-grid--2col">
+            <div class="form-group">
+              <label class="form-label" for="visual-target">Learn Words In</label>
+              <select class="form-select" id="visual-target">
+                {% for lang in languages %}
+                <option value="{{ lang }}" {% if lang == 'French' %}selected{% endif %}>{{ lang }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="visual-source">Translate From</label>
+              <select class="form-select" id="visual-source">
+                {% for lang in languages %}
+                <option value="{{ lang }}" {% if lang == 'English' %}selected{% endif %}>{{ lang }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+
+          <button class="submit-btn visual-gradient" id="visual-submit" {% if not has_vision %}disabled{% endif %}>
+            <span class="btn-text">Identify &amp; Translate</span>
+            <span class="btn-icon">🔍</span>
+          </button>
+        </div>
+
+        <div class="result-card hidden flex-1" id="visual-result">
+          <div class="result-header">
+            <span class="result-title">Visual Vocabulary</span>
+            <span class="result-timing" id="visual-timing"></span>
+          </div>
+          <div class="result-body markdown-body" id="visual-output"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════
+         TAB 3 · Translation Practice
+    ═════════════════════════════════════════════ -->
+    <section class="tab-panel" id="tab-translation" role="tabpanel"
+             aria-labelledby="btn-translation">
+      <div class="panel-header">
+        <div class="panel-icon-wrap translation-gradient">🔄</div>
+        <div>
+          <h2 class="panel-title">Translation Practice</h2>
+          <p class="panel-desc">Translate a sentence · get scored and corrected by AI</p>
+        </div>
+      </div>
+
+      <div class="form-grid form-grid--3col">
+        <div class="form-group">
+          <label class="form-label" for="trans-source-lang">From Language</label>
+          <select class="form-select" id="trans-source-lang">
+            {% for lang in languages %}
+            <option value="{{ lang }}" {% if lang == 'English' %}selected{% endif %}>{{ lang }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="trans-target-lang">To Language</label>
+          <select class="form-select" id="trans-target-lang">
+            {% for lang in languages %}
+            <option value="{{ lang }}" {% if lang == 'French' %}selected{% endif %}>{{ lang }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="trans-level">Level</label>
+          <select class="form-select" id="trans-level">
+            {% for lvl in proficiency_levels %}
+            <option value="{{ lvl }}" {% if 'Intermediate' in lvl %}selected{% endif %}>{{ lvl }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <div class="translation-pair">
+        <div class="form-group">
+          <label class="form-label" for="trans-original">
+            Original Text <span class="lang-tag" id="trans-from-tag">English</span>
+          </label>
+          <textarea class="form-textarea" id="trans-original" rows="3"
+                    placeholder="Enter the sentence to translate…"></textarea>
+        </div>
+        <div class="swap-arrow" id="trans-swap" title="Swap languages" aria-label="Swap languages">⇄</div>
+        <div class="form-group">
+          <label class="form-label" for="trans-student">
+            Your Translation <span class="lang-tag" id="trans-to-tag">French</span>
+          </label>
+          <textarea class="form-textarea" id="trans-student" rows="3"
+                    placeholder="Write your translation here…"></textarea>
+        </div>
+      </div>
+
+      <div class="example-chips" data-feature="translation">
+        <span class="chip-label">Quick example:</span>
+        <button class="chip"
+                data-original="The children are playing in the park near the river."
+                data-student="Les enfants jouent dans le parc près de la rivière."
+                data-src="English" data-tgt="French" data-level="Intermediate (B1-B2)">
+          EN→FR park sentence
+        </button>
+        <button class="chip"
+                data-original="I would like to book a table for two tonight."
+                data-student="Je voudrais réserver une table pour deux personnes ce soir."
+                data-src="English" data-tgt="French" data-level="Beginner (A1-A2)">
+          EN→FR restaurant
+        </button>
+      </div>
+
+      <button class="submit-btn translation-gradient" id="translation-submit">
+        <span class="btn-text">Check My Translation</span>
+        <span class="btn-icon">✅</span>
+      </button>
+
+      <div class="result-card hidden" id="translation-result">
+        <div class="result-header">
+          <span class="result-title">Translation Feedback</span>
+          <span class="result-timing" id="translation-timing"></span>
+        </div>
+        <div class="result-body markdown-body" id="translation-output"></div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════
+         TAB 4 · Vocabulary Builder
+    ═════════════════════════════════════════════ -->
+    <section class="tab-panel" id="tab-vocabulary" role="tabpanel"
+             aria-labelledby="btn-vocabulary">
+      <div class="panel-header">
+        <div class="panel-icon-wrap vocab-gradient">📚</div>
+        <div>
+          <h2 class="panel-title">Vocabulary Builder</h2>
+          <p class="panel-desc">Enter a topic · get a full vocabulary lesson with a quiz</p>
+        </div>
+      </div>
+
+      <div class="form-grid form-grid--3col">
+        <div class="form-group" style="grid-column: 1 / -1">
+          <label class="form-label" for="vocab-topic">Topic</label>
+          <input class="form-input" id="vocab-topic" type="text"
+                 placeholder="e.g. Food, Travel, Family, Technology, School…" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="vocab-lang">Target Language</label>
+          <select class="form-select" id="vocab-lang">
+            {% for lang in languages %}
+            <option value="{{ lang }}" {% if lang == 'Swahili' %}selected{% endif %}>{{ lang }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="vocab-level">Level</label>
+          <select class="form-select" id="vocab-level">
+            {% for lvl in proficiency_levels %}
+            <option value="{{ lvl }}" {% if 'Beginner' in lvl %}selected{% endif %}>{{ lvl }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="vocab-num">
+            Words: <span id="vocab-num-display">10</span>
+          </label>
+          <input class="form-range" id="vocab-num" type="range"
+                 min="5" max="20" step="1" value="10" />
+          <div class="range-labels">
+            <span>5</span><span>20</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="example-chips" data-feature="vocab">
+        <span class="chip-label">Quick example:</span>
+        <button class="chip" data-topic="Food and Cooking" data-lang="Swahili" data-level="Beginner (A1-A2)">Food · Swahili</button>
+        <button class="chip" data-topic="School and Education" data-lang="French" data-level="Intermediate (B1-B2)">School · French</button>
+        <button class="chip" data-topic="Family and Relationships" data-lang="Lingala" data-level="Beginner (A1-A2)">Family · Lingala</button>
+        <button class="chip" data-topic="Transportation" data-lang="Japanese" data-level="Beginner (A1-A2)">Transport · Japanese</button>
+      </div>
+
+      <button class="submit-btn vocab-gradient" id="vocabulary-submit">
+        <span class="btn-text">Generate Lesson</span>
+        <span class="btn-icon">📖</span>
+      </button>
+
+      <div class="result-card hidden" id="vocabulary-result">
+        <div class="result-header">
+          <span class="result-title">Vocabulary Lesson</span>
+          <span class="result-timing" id="vocabulary-timing"></span>
+        </div>
+        <div class="result-body markdown-body" id="vocabulary-output"></div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════
+         TAB 5 · Conversation Practice
+    ═════════════════════════════════════════════ -->
+    <section class="tab-panel" id="tab-conversation" role="tabpanel"
+             aria-labelledby="btn-conversation">
+      <div class="panel-header">
+        <div class="panel-icon-wrap convo-gradient">💬</div>
+        <div>
+          <h2 class="panel-title">Conversation Practice</h2>
+          <p class="panel-desc">Choose a scenario · chat with your AI partner · get inline corrections</p>
+        </div>
+      </div>
+
+      <div class="form-grid form-grid--3col">
+        <div class="form-group" style="grid-column: 1 / -1">
+          <label class="form-label" for="convo-scenario">Scenario</label>
+          <select class="form-select" id="convo-scenario">
+            {% for sc in conversation_scenarios %}
+            <option value="{{ sc }}">{{ sc }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="convo-lang">Practice Language</label>
+          <select class="form-select" id="convo-lang">
+            {% for lang in languages %}
+            <option value="{{ lang }}" {% if lang == 'French' %}selected{% endif %}>{{ lang }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="convo-level">Level</label>
+          <select class="form-select" id="convo-level">
+            {% for lvl in proficiency_levels %}
+            <option value="{{ lvl }}" {% if 'Beginner' in lvl %}selected{% endif %}>{{ lvl }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group" style="display:flex; align-items:flex-end;">
+          <button class="reset-btn" id="convo-reset" title="Start a new conversation">
+            🔄 New Conversation
+          </button>
+        </div>
+      </div>
+
+      <!-- Chat window -->
+      <div class="chat-window" id="chat-window" aria-live="polite">
+        <div class="chat-empty" id="chat-empty">
+          <div class="chat-empty-icon">🗣️</div>
+          <p>Start the conversation by typing a message below.</p>
+          <p class="chat-empty-hint">Try: <em>"Bonjour, je voudrais une table pour deux."</em></p>
+        </div>
+      </div>
+
+      <!-- Message input -->
+      <div class="chat-input-row">
+        <textarea class="chat-input" id="convo-input"
+                  placeholder="Type in your target language… (press Enter to send, Shift+Enter for new line)"
+                  rows="2"></textarea>
+        <button class="send-btn convo-gradient" id="convo-submit" aria-label="Send message">
+          <span>Send</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="22" y1="2" x2="11" y2="13"></line>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+          </svg>
+        </button>
+      </div>
+      <div class="convo-timing hidden" id="convo-timing"></div>
+    </section>
+
+  </main><!-- /tab-content -->
+
+  <!-- ── Loading Overlay ── -->
+  <div class="loading-overlay hidden" id="loading-overlay" role="status" aria-live="polite">
+    <div class="loader-card">
+      <div class="loader-spinner"></div>
+      <p class="loader-text" id="loader-text">Thinking…</p>
+      <div class="loader-dots">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Toast notifications ── -->
+  <div class="toast-container" id="toast-container" aria-live="assertive"></div>
+
+  <!-- ── Footer ── -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <span class="footer-logo">Mwalimu</span>
+        <span class="footer-tagline">"Teacher" in Swahili</span>
+      </div>
+      <div class="footer-info">
+        Built by <strong>Pascal Burume Buhendwa</strong> ·
+        ABE Initiative @ Kobe Institute of Computing ·
+        <em>AI in Education for Sustainable Development in the DRC</em>
+      </div>
+      <div class="footer-tech">
+        <span class="tech-badge">Gemma 3n</span>
+        <span class="tech-badge">Ollama</span>
+        <span class="tech-badge">Flask</span>
+        <span class="tech-badge">TypeScript</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Inject server config into window so TypeScript can read it -->
+  <script>
+    window.MWALIMU_CONFIG = {
+      hasVision: {{ 'true' if has_vision else 'false' }},
+      model: "{{ model }}"
+    };
+  </script>
+  <script src="/static/js/main.js"></script>
+</body>
+</html>

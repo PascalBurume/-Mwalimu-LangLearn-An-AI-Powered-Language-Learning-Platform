@@ -1,0 +1,22 @@
+# Mwalimu-LangLearn dependencies
+# Install with:  pip install -r requirements.txt
+#
+# Runtime environment: Python 3.10+
+# See CODEBASE_ANALYSIS.md §4.8 for the original notebook dependency notes.
+
+# ── Ollama Python client ───────────────────────────────────────────────────────
+# Provides the ollama.Client used in mwalimu/inference.py.
+# Ollama server must be installed and running separately:
+#   https://ollama.com/download
+ollama>=0.2.0
+
+# ── Web interface ──────────────────────────────────────────────────────────────
+# Gradio (original notebook UI — kept for backward compatibility)
+gradio==4.36.0
+huggingface_hub==0.25.2
+
+# Flask (new animated TypeScript UI — use flask_app.py)
+flask>=3.0.0
+
+# ── Image processing ───────────────────────────────────────────────────────────
+Pillow>=10.0.0
